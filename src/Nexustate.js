@@ -1,11 +1,11 @@
 import { getObjectPath, assurePathExists, has, get, set } from 'objer'
-import { findIndex, getKeys, throttle, getKeyFilledObject } from './DataManagerHelpers';
+import { findIndex, getKeys, throttle, getKeyFilledObject } from './NexustateHelpers';
 import StorageManager from './StorageManager';
 
 const DEFAULT_STORAGE_KEY = '__NEXUSTATE_SAVED_DATA';
 const SAVE_THROTTLE_TIME = 100;
 
-export default class DataManager {
+export default class Nexustate {
   constructor({ saveCallback = null, loadCallback = null, storageKey = DEFAULT_STORAGE_KEY, noPersist = false } = {}) {
     this.storageManager = new StorageManager({ persist: this.persist, notify: this.notifySavedChange, loadPersisted: this.loadPersisted });
     this.listenerObject = { subkeys: {} };

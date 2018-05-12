@@ -1,13 +1,13 @@
-import DataManager from './DataManager';
+import Nexustate from './Nexustate';
 import { expect } from 'chai';
 import { equal } from 'assert';
 const TEST_STORAGE_KEY = 'TESTTESTTEST';
 
-describe('DataManager', () => {
+describe('Nexustate', () => {
   describe('Save and load', () => {
     it('saves and loads as expected', () => {
-      const manager = new DataManager({ storageKey: TEST_STORAGE_KEY });
-      const manager2 = new DataManager({ storageKey: TEST_STORAGE_KEY });
+      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY });
+      const manager2 = new Nexustate({ storageKey: TEST_STORAGE_KEY });
 
       manager.set({ hello: 'world' }, { immediatePersist: true });
 
@@ -24,8 +24,8 @@ describe('DataManager', () => {
     });
 
     it('does not persist when the user configures that', () => {
-      const manager = new DataManager({ noPersist: true, storageKey: TEST_STORAGE_KEY });
-      const manager2 = new DataManager({ noPersist: true, storageKey: TEST_STORAGE_KEY });
+      const manager = new Nexustate({ noPersist: true, storageKey: TEST_STORAGE_KEY });
+      const manager2 = new Nexustate({ noPersist: true, storageKey: TEST_STORAGE_KEY });
 
       manager.set({ NO: 'SAVING' }, { immediatePersist: true });
       manager2.load();
@@ -35,7 +35,7 @@ describe('DataManager', () => {
     });
 
     it('notifies listeners of changes', () => {
-      const manager = new DataManager({ storageKey: TEST_STORAGE_KEY });
+      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY });
       let passedData = null;
       const callback = changes => { passedData = changes; };
 
@@ -46,7 +46,7 @@ describe('DataManager', () => {
     });
 
     it('notifies listeners of multiple changes in one event', () => {
-      const manager = new DataManager({ storageKey: TEST_STORAGE_KEY });
+      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY });
       let passedData = null;
       const callback = changes => { passedData = changes; };
 
@@ -58,7 +58,7 @@ describe('DataManager', () => {
     });
 
     it('notifies listeners of multiple changes with transforms correctly', () => {
-      const manager = new DataManager({ storageKey: TEST_STORAGE_KEY });
+      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY });
       const passedData = [];
       const callback = changes => { passedData.push(changes); };
 
@@ -72,7 +72,7 @@ describe('DataManager', () => {
     });
 
     it('notifies listeners of multiple changes with transforms correctly when using object notation', () => {
-      const manager = new DataManager({ storageKey: TEST_STORAGE_KEY });
+      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY });
       const passedData = [];
       const callback = changes => { passedData.push(changes); };
 
@@ -85,7 +85,7 @@ describe('DataManager', () => {
     });
 
     it('notifies listeners of changes to subpaths', () => {
-      const manager = new DataManager({ storageKey: TEST_STORAGE_KEY });
+      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY });
       let passedData = null;
       const callback = changes => { passedData = changes; };
 
@@ -96,7 +96,7 @@ describe('DataManager', () => {
     });
 
     it('only notifies listeners of changes once when the user re-listens', () => {
-      const manager = new DataManager({ storageKey: TEST_STORAGE_KEY });
+      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY });
       let counter = 0;
       const callback = () => { counter += 1; };
 
@@ -112,7 +112,7 @@ describe('DataManager', () => {
     });
 
     it('allows listeners to unlisten', () => {
-      const manager = new DataManager({ storageKey: TEST_STORAGE_KEY });
+      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY });
       let untouchedData = null;
 
       const overwriteCallback = (data) => { untouchedData = data; };
@@ -124,7 +124,7 @@ describe('DataManager', () => {
     });
 
     it('allows listeners to unlisten by component', () => {
-      const manager = new DataManager({ storageKey: TEST_STORAGE_KEY });
+      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY });
       let untouchedData = null;
 
       const overwriteCallback = (data) => { untouchedData = data; };

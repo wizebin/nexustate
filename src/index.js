@@ -1,4 +1,4 @@
-import DataManager from './DataManager';
-import getDataManager from './getDataManager';
+import Nexustate from './Nexustate';
+import getNexustate from './getNexustate';
 
-export { DataManager, getDataManager };
+export { Nexustate, getNexustate };
