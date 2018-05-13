@@ -13,12 +13,12 @@ export default class Nexustate {
     this.saveCallback = saveCallback;
     this.loadCallback = loadCallback;
     if (!saveCallback) {
-      if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
-        this.saveCallback = (key, data) => window.localStorage.setItem(key, JSON.stringify(data));
-        this.loadCallback = (key) => this.storageManager.set(null, JSON.parse(window.localStorage.getItem(key)));
-      } else if (typeof global !== 'undefined' && typeof global.localStorage !== 'undefined') {
+      if (typeof global !== 'undefined' && typeof global.localStorage !== 'undefined') {
         this.saveCallback = (key, data) => global.localStorage.setItem(key, JSON.stringify(data));
         this.loadCallback = (key) => this.storageManager.set(null, JSON.parse(global.localStorage.getItem(key)));
+      } else if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
+        this.saveCallback = (key, data) => window.localStorage.setItem(key, JSON.stringify(data));
+        this.loadCallback = (key) => this.storageManager.set(null, JSON.parse(window.localStorage.getItem(key)));
       }
     }
     this.noPersist = noPersist;
