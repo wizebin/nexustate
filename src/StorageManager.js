@@ -22,7 +22,12 @@ export default class StorageManager {
     for (let keydex = 0; keydex < keyArray.length - 1; keydex += 1) {
       value = value[keyArray[keydex]];
     }
-    delete value[keyArray[keyArray.length - 1]];
+    const finalKey = keyArray[keyArray.length - 1]
+    if (value instanceof Array && toString.call(finalKey) === '[object Number]') {
+      value.splice(finalKey, 1);
+    } else {
+      delete value[finalKey];
+    }
   }
 
   push(key, value) {
