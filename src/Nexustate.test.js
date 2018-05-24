@@ -17,8 +17,6 @@ describe('Nexustate', () => {
       manager.save();
       manager2.load();
 
-      console.log(manager2.storageManager.data);
-
       expect(manager.get('hello')).to.deep.equal('world');
       expect(manager2.get('hello')).to.deep.equal('world');
     });
@@ -111,7 +109,7 @@ describe('Nexustate', () => {
       expect(counter).to.deep.equal(1);
     });
 
-    it.only('skips notifying parents of updates when they request noChildUpdates', () => {
+    it('skips notifying parents of updates when they request noChildUpdates', () => {
       const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY });
       let counter = 0;
       const callback = () => { counter += 1; };
