@@ -108,11 +108,17 @@ export default class Nexustate {
 
   throttledSave = throttle(this.save, SAVE_THROTTLE_TIME);
 
-  recurseMatchingPathsForListeners(change, listenerObject, key = []) {
+  recurseMatchingPathsForListeners(change, listenerObject, key = [], originalChangeDepth = 0, currentChangeDepth = 0) {
+    const changeRelativity = originalChangeDepth - currentChangeDepth; // Parent change > 0, child change < 0, currentChange == 0
     let result = [];
     if (has(listenerObject, 'listeners')) {
       for (let listenerdex = 0; listenerdex < listenerObject.listeners.length; listenerdex += 1) {
-        result.push({ listener: listenerObject.listeners[listenerdex], key });
+        const listener = listenerObject.listeners[listenerdex];
+        if (listener.noChildUpdates === true && changeRelativity > 0) {} // Skip informing parents who don't care
+        else if (listener.noParentUpdates === true && changeRelativity < 0) {} // Skip informing children who don't care
+        else {
+          result.push({ listener, key });
+        }
       }
     }
 
@@ -121,7 +127,7 @@ export default class Nexustate {
       for (let keydex = 0; keydex < changeKeys.length; keydex += 1) {
         const changeKey = changeKeys[keydex];
         if (has(listenerObject.subkeys, changeKey)) {
-          result = result.concat(this.recurseMatchingPathsForListeners(change[changeKey], listenerObject.subkeys[changeKey], key.concat(changeKey)));
+          result = result.concat(this.recurseMatchingPathsForListeners(change[changeKey], listenerObject.subkeys[changeKey], key.concat(changeKey), originalChangeDepth, currentChangeDepth + 1));
         }
       }
     }
@@ -132,12 +138,11 @@ export default class Nexustate {
   notify = ({ key, value }) => {
     // TODO: Notify about values that are being removed
     const keyArray = key !== null ? getObjectPath(key) : [];
-
-    const listenersWithKeys = this.recurseMatchingPathsForListeners(getKeyFilledObject(key, value), this.listenerObject, keyArray); // this kills the specificity arrangement
+    const listenersWithKeys = this.recurseMatchingPathsForListeners(getKeyFilledObject(key, value), this.listenerObject, [], keyArray.length); // this kills the specificity arrangement
     this.batchAndNotifyOfChanges(listenersWithKeys);
   }
 
-  listen = (listener = { key: null, callback: () => {}, alias: null, component: null, transform: null }) => {
+  listen = (listener = { key: null, callback: () => {}, alias: null, component: null, transform: null, noChildUpdates: false }) => {
     const listeners = this.getListenersAtPath(listener.key);
     const matchedListeners = listeners.reduce((results, existingListener, dex) => {
       if (existingListener.callback === listener.callback) results.push(dex);

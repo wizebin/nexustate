@@ -111,6 +111,20 @@ describe('Nexustate', () => {
       expect(counter).to.deep.equal(1);
     });
 
+    it.only('skips notifying parents of updates when they request noChildUpdates', () => {
+      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY });
+      let counter = 0;
+      const callback = () => { counter += 1; };
+
+      manager.listen({ key: 'a.b', callback, alias: 'boop', noChildUpdates: true });
+      manager.setKey(['a', 'b'], { c: 5 }); // Should get a notification
+      expect(counter).to.deep.equal(1);
+      manager.setKey(['a', 'b', 'c'], 6); // Should not get a notification
+      expect(counter).to.deep.equal(1);
+      manager.setKey(['a'], { b: { c: 5 } }); // Should get a notification
+      expect(counter).to.deep.equal(2);
+    });
+
     it('allows listeners to unlisten', () => {
       const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY });
       let untouchedData = null;
