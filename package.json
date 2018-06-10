@@ -3,6 +3,7 @@
   "version": "1.0.12",
   "description": "Nexusoft state management",
   "main": "./dist/src/index.js",
+  "typings": "./src/nexustate.d.ts",
   "scripts": {
     "test": "./node_modules/.bin/mocha --opts ./.mocharc",
     "dev": "webpack --mode development",
