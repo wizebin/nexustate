@@ -1,13 +1,15 @@
-import { getObjectPath, assurePathExists, has, get, set } from 'objer'
-import { findIndex, getKeys, throttle, getKeyFilledObject } from './NexustateHelpers';
+import { getObjectPath, keys, assurePathExists, has, get, set } from 'objer'
+import { findIndex, throttle, getKeyFilledObject } from './NexustateHelpers';
 import StorageManager from './StorageManager';
 
 const DEFAULT_STORAGE_KEY = '__NEXUSTATE_SAVED_DATA';
 const SAVE_THROTTLE_TIME = 100;
 
+export { DEFAULT_STORAGE_KEY };
+
 export default class Nexustate {
   constructor({ saveCallback = null, loadCallback = null, storageKey = DEFAULT_STORAGE_KEY, noPersist = false } = {}) {
-    this.storageManager = new StorageManager({ persist: this.persist, notify: this.notifySavedChange, loadPersisted: this.loadPersisted });
+    this.storageManager = new StorageManager();
     this.listenerObject = { subkeys: {} };
     this.storageKey = storageKey;
     this.saveCallback = saveCallback;
@@ -24,14 +26,23 @@ export default class Nexustate {
     this.noPersist = noPersist;
   }
 
+  setPersistenceFunctions = (save, load) => {
+    this.saveCallback = save;
+    this.loadCallback = load;
+  }
+
+  setPersist = (shouldPersist) => {
+    this.noPersist = !shouldPersist;
+  }
+
   /**
    * Overwrites the top level values of object into the storageManager, just like react setState
    */
   set = (object, options = { immediatePersist: false, noNotify: false }) => {
-    const keys = getKeys(object);
+    const objectKeys = keys(object);
     const result = [];
-    for (let keydex = 0; keydex < keys.length; keydex += 1) {
-      result.push(this.setKey(keys[keydex], object[keys[keydex]], options));
+    for (let keydex = 0; keydex < objectKeys.length; keydex += 1) {
+      result.push(this.setKey(objectKeys[keydex], object[objectKeys[keydex]], options));
     }
     return result;
   }
@@ -123,7 +134,7 @@ export default class Nexustate {
     }
 
     if (has(listenerObject, 'subkeys') && (change instanceof Array || typeof change === 'object')) {
-      const changeKeys = getKeys(change);
+      const changeKeys = keys(change);
       for (let keydex = 0; keydex < changeKeys.length; keydex += 1) {
         const changeKey = changeKeys[keydex];
         if (has(listenerObject.subkeys, changeKey)) {
@@ -185,9 +196,9 @@ export default class Nexustate {
   unlistenComponent = (component, basePath) => {
     const patharray = (basePath || []);
     const subkeypath = (basePath || []).concat('subkeys');
-    const keys = getKeys(get(this.listenerObject, subkeypath));
-    for (let keydex = 0; keydex < keys.length; keydex += 1) {
-      this.unlistenComponent(component, subkeypath.concat([keys[keydex]]));
+    const subKeys = keys(get(this.listenerObject, subkeypath));
+    for (let keydex = 0; keydex < subKeys.length; keydex += 1) {
+      this.unlistenComponent(component, subkeypath.concat([subKeys[keydex]]));
     }
 
     const listeners = get(this.listenerObject, patharray.concat('listeners'));

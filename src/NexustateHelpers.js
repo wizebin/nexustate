@@ -7,20 +7,6 @@ export function findIndex(array, callback, context) {
   return -1;
 }
 
-export function getKeys(object) {
-  if (!object) return [];
-  if (typeof Object.keys === 'undefined') return Object.keys(object);
-  const keys = [];
-
-  for(let key in object) {
-    if (object.hasOwnProperty(key)) {
-      keys.push(key);
-    }
-  }
-
-  return keys;
-}
-
 // ** COPIED FROM UNDERSCORE JS **
 // Returns a function, that, when invoked, will only be triggered at most once
 // during a given window of time. Normally, the throttled function will run
