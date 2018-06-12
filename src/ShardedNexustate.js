@@ -1,5 +1,5 @@
 import Nexustate, { DEFAULT_STORAGE_KEY } from './Nexustate';
-import { values } from 'objer';
+import { values, getTypeString } from 'objer';
 
 export default class ShardedNexustate {
   constructor() {
@@ -33,5 +33,17 @@ export default class ShardedNexustate {
 
   getAllShards = () => {
     return this.dataManagerShards;
+  }
+
+  loadShards = (shardList) => {
+    (shardList || []).forEach(shard => {
+      const typeString = getTypeString(shard);
+      if (typeString === 'object') {
+        const { name, options } = shard;
+        this.getShard(name, options);
+      } else if (typeString === 'string') {
+        this.getShard(shard);
+      }
+    });
   }
 }
