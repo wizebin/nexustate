@@ -17,10 +17,10 @@ export default class Nexustate {
     if (!saveCallback) {
       if (typeof global !== 'undefined' && typeof global.localStorage !== 'undefined') {
         this.saveCallback = (key, data) => global.localStorage.setItem(key, JSON.stringify(data));
-        this.loadCallback = (key) => this.storageManager.set(null, JSON.parse(global.localStorage.getItem(key)));
+        this.loadCallback = (key) => JSON.parse(global.localStorage.getItem(key));
       } else if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
         this.saveCallback = (key, data) => window.localStorage.setItem(key, JSON.stringify(data));
-        this.loadCallback = (key) => this.storageManager.set(null, JSON.parse(window.localStorage.getItem(key)));
+        this.loadCallback = (key) => JSON.parse(window.localStorage.getItem(key));
       }
     }
     this.noPersist = noPersist;
@@ -115,7 +115,7 @@ export default class Nexustate {
   }
 
   save = () => (this.saveCallback(this.storageKey, this.storageManager.get()));
-  load = () => (this.loadCallback(this.storageKey));
+  load = () => (this.storageManager.set(null, this.loadCallback(this.storageKey)));
 
   throttledSave = throttle(this.save, SAVE_THROTTLE_TIME);
 
