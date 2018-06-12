@@ -64,4 +64,6 @@ export class Nexustate {
 
 export function getNexustate(name: string, options: any): Nexustate;
 
-export { ShardedNexustate };
+export function getShardedNexustate(name: string): ShardedNexustate;
+
+export { ShardedNexustate, getShardedNexustate };
