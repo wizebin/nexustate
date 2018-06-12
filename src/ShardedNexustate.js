@@ -29,4 +29,8 @@ export default class ShardedNexustate {
   createShard = (shard, options) => {
     return this.getShard(shard, options);
   }
+
+  getAllShards = () => {
+    return this.dataManagerShards;
+  }
 }

@@ -10,6 +10,7 @@ type nexustateOptions = {
 declare class ShardedNexustate {
   getShard(string): Nexustate
   createShard(string, nexustateOptions): Nexustate
+  getAllShards(): Nexustate[]
   setAllPersistenceFunctions(saveCallback, loadCallback): void
 }
 
