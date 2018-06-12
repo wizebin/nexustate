@@ -38,11 +38,16 @@ export default class ShardedNexustate {
   loadShards = (shardList) => {
     (shardList || []).forEach(shard => {
       const typeString = getTypeString(shard);
+      let loadedShard = null;
       if (typeString === 'object') {
         const { name, options } = shard;
-        this.getShard(name, options);
+        loadedShard = this.getShard(name, options);
       } else if (typeString === 'string') {
-        this.getShard(shard);
+        loadedShard = this.getShard(shard);
+      }
+
+      if (loadedShard) {
+        loadedShard.load();
       }
     });
   }
