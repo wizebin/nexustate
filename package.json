@@ -1,9 +1,9 @@
 {
   "name": "nexustate",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Nexusoft state management",
   "main": "./dist/src/index.js",
-  "typings": "./src/nexustate.d.ts",
+  "typings": "./src/index.d.ts",
   "scripts": {
     "test": "./node_modules/.bin/mocha --opts ./.mocharc",
     "dev": "webpack --mode development",
@@ -40,6 +40,6 @@
   "dependencies": {
     "fill-range": "^5.0.0",
     "fsevents": "^1.2.4",
-    "objer": "^1.0.28"
+    "objer": "^1.0.31"
   }
 }
