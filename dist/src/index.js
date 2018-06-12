@@ -171,11 +171,11 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /*!************************************!*\
   !*** ./src/getShardedNexustate.js ***!
   \************************************/
-/*! exports provided: getShardedNexustate */
+/*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"getShardedNexustate\", function() { return getShardedNexustate; });\n/* harmony import */ var _ShardedNexustate__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ShardedNexustate */ \"./src/ShardedNexustate.js\");\n\n\nfunction getShardedNexustate() {\n  if (!getShardedNexustate.shardedNexustate) {\n    getShardedNexustate.shardedNexustate = new _ShardedNexustate__WEBPACK_IMPORTED_MODULE_0__[\"default\"]();\n  }\n\n  return getShardedNexustate.shardedNexustate;\n}\n\n//# sourceURL=webpack://nexusdk/./src/getShardedNexustate.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"default\", function() { return getShardedNexustate; });\n/* harmony import */ var _ShardedNexustate__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ShardedNexustate */ \"./src/ShardedNexustate.js\");\n\n\nfunction getShardedNexustate() {\n  if (!getShardedNexustate.shardedNexustate) {\n    getShardedNexustate.shardedNexustate = new _ShardedNexustate__WEBPACK_IMPORTED_MODULE_0__[\"default\"]();\n  }\n\n  return getShardedNexustate.shardedNexustate;\n}\n\n//# sourceURL=webpack://nexusdk/./src/getShardedNexustate.js?");
 
 /***/ }),
 
