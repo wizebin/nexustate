@@ -8,7 +8,7 @@ describe('ShardedNexustate', () => {
       const shards = new ShardedNexustate();
       let tempSaving = null;
       let tempLoading = null;
-      const defaultShard = shards.getShard();
+      const defaultShard = shards.getShard('default', { persist: true });
 
       const originalSaveCallback = defaultShard.saveCallback;
       const originalLoadCallback = defaultShard.loadCallback;
@@ -20,7 +20,7 @@ describe('ShardedNexustate', () => {
 
       expect(tempSaving).to.equal(null);
 
-      defaultShard.setKey(['a', 'b'], 'hi');
+      defaultShard.setKey(['a', 'b'], 'hi', { immediatePersist: true });
 
       expect(tempSaving).to.deep.equal(['default', { a: { b: 'hi' } }]);
     });
@@ -30,7 +30,7 @@ describe('ShardedNexustate', () => {
       let tempSaving = null;
       let tempLoading = null;
 
-      const defaultShard = shards.getShard();
+      const defaultShard = shards.getShard('default', { persist: true });
 
       shards.setAllPersistenceFunctions(
         ((...saving) => {
