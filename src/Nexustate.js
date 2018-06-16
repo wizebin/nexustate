@@ -1,4 +1,4 @@
-import { getObjectPath, keys, assurePathExists, has, get, set } from 'objer'
+import { getObjectPath, keys, assurePathExists, has, get, set, getTypeString } from 'objer'
 import { findIndex, throttle, getKeyFilledObject } from './NexustateHelpers';
 import StorageManager from './StorageManager';
 
@@ -126,7 +126,18 @@ export default class Nexustate {
   }
 
   save = () => (this.saveCallback(this.storageKey, this.storageManager.get()));
-  load = () => (this.storageManager.set(null, this.loadCallback(this.storageKey)));
+  load = () => {
+    const loadResults = this.loadCallback(this.storageKey);
+    const resultType = getTypeString(loadResults);
+
+    if (resultType === 'promise') {
+      return loadResults.then(data => {
+        this.storageManager.set(null, data);
+      });
+    }
+
+    return this.storageManager.set(null, loadResults);
+  };
 
   throttledSave = throttle(this.save, SAVE_THROTTLE_TIME);
 

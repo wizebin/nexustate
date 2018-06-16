@@ -21,6 +21,15 @@ describe('Nexustate', () => {
       expect(manager2.get('hello')).to.deep.equal('world');
     });
 
+    it('loads promises', (done) => {
+      const manager = new Nexustate({ persist: true, storageKey: TEST_STORAGE_KEY, loadCallback: () => Promise.resolve({ a: 'b' }) });
+
+      manager.load().then(() => {
+        expect(manager.get('a')).to.deep.equal('b');
+        done();
+      });
+    });
+
     it('does not persist when the user configures that', () => {
       const manager = new Nexustate({ persist: false, storageKey: TEST_STORAGE_KEY });
       const manager2 = new Nexustate({ persist: false, storageKey: TEST_STORAGE_KEY, loadCallback: () => ({}) });
