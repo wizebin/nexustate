@@ -62,6 +62,16 @@ export class Nexustate {
     unlistenComponent(component: any, basePath?: KeyType): void;
 }
 
-export function getNexustate(name: string, options: any): Nexustate;
+type SaveCallbackFunc = (string, any) => boolean;
+type LoadCallbackFunc = (string) => any;
+
+type NexustateOptions = {
+    persist: boolean,
+    saveCallback: SaveCallbackFunc,
+    loadCallback: LoadCallbackFunc,
+    storageKey: string,
+};
+
+export function getNexustate(name: string, options: NexustateOptions): Nexustate;
 
 export function getShardedNexustate(): ShardedNexustate;

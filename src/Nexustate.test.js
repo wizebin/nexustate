@@ -1,4 +1,4 @@
-import Nexustate from './Nexustate';
+import Nexustate, { getLocalStorageLoadFunc, getLocalStorageSaveFunc } from './Nexustate';
 import { expect } from 'chai';
 import { equal } from 'assert';
 const TEST_STORAGE_KEY = 'TESTTESTTEST';
@@ -6,8 +6,8 @@ const TEST_STORAGE_KEY = 'TESTTESTTEST';
 describe('Nexustate', () => {
   describe('Save and load', () => {
     it('saves and loads as expected', () => {
-      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY });
-      const manager2 = new Nexustate({ storageKey: TEST_STORAGE_KEY });
+      const manager = new Nexustate({ persist: true, storageKey: TEST_STORAGE_KEY, saveCallback: getLocalStorageSaveFunc(), loadCallback: getLocalStorageLoadFunc() });
+      const manager2 = new Nexustate({ persist: true, storageKey: TEST_STORAGE_KEY, saveCallback: getLocalStorageSaveFunc(), loadCallback: getLocalStorageLoadFunc() });
 
       manager.set({ hello: 'world' }, { immediatePersist: true });
 
@@ -22,8 +22,8 @@ describe('Nexustate', () => {
     });
 
     it('does not persist when the user configures that', () => {
-      const manager = new Nexustate({ noPersist: true, storageKey: TEST_STORAGE_KEY });
-      const manager2 = new Nexustate({ noPersist: true, storageKey: TEST_STORAGE_KEY });
+      const manager = new Nexustate({ persist: false, storageKey: TEST_STORAGE_KEY });
+      const manager2 = new Nexustate({ persist: false, storageKey: TEST_STORAGE_KEY, loadCallback: () => ({}) });
 
       manager.set({ NO: 'SAVING' }, { immediatePersist: true });
       manager2.load();
@@ -33,7 +33,7 @@ describe('Nexustate', () => {
     });
 
     it('notifies listeners of changes', () => {
-      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY });
+      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY, saveCallback: getLocalStorageSaveFunc(), loadCallback: getLocalStorageLoadFunc() });
       let passedData = null;
       const callback = changes => { passedData = changes; };
 
@@ -44,7 +44,7 @@ describe('Nexustate', () => {
     });
 
     it('notifies listeners of multiple changes in one event', () => {
-      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY });
+      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY, saveCallback: getLocalStorageSaveFunc(), loadCallback: getLocalStorageLoadFunc() });
       let passedData = null;
       const callback = changes => { passedData = changes; };
 
@@ -56,7 +56,7 @@ describe('Nexustate', () => {
     });
 
     it('notifies listeners of multiple changes with transforms correctly', () => {
-      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY });
+      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY, saveCallback: getLocalStorageSaveFunc(), loadCallback: getLocalStorageLoadFunc() });
       const passedData = [];
       const callback = changes => { passedData.push(changes); };
 
@@ -70,7 +70,7 @@ describe('Nexustate', () => {
     });
 
     it('notifies listeners of multiple changes with transforms correctly when using object notation', () => {
-      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY });
+      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY, saveCallback: getLocalStorageSaveFunc(), loadCallback: getLocalStorageLoadFunc() });
       const passedData = [];
       const callback = changes => { passedData.push(changes); };
 
@@ -83,7 +83,7 @@ describe('Nexustate', () => {
     });
 
     it('notifies listeners of changes to subpaths', () => {
-      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY });
+      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY, saveCallback: getLocalStorageSaveFunc(), loadCallback: getLocalStorageLoadFunc() });
       let passedData = null;
       const callback = changes => { passedData = changes; };
 
@@ -94,7 +94,7 @@ describe('Nexustate', () => {
     });
 
     it('only notifies listeners of changes once when the user re-listens', () => {
-      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY });
+      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY, saveCallback: getLocalStorageSaveFunc(), loadCallback: getLocalStorageLoadFunc() });
       let counter = 0;
       const callback = () => { counter += 1; };
 
@@ -110,7 +110,7 @@ describe('Nexustate', () => {
     });
 
     it('skips notifying parents of updates when they request noChildUpdates', () => {
-      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY });
+      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY, saveCallback: getLocalStorageSaveFunc(), loadCallback: getLocalStorageLoadFunc() });
       let counter = 0;
       const callback = () => { counter += 1; };
 
@@ -124,7 +124,7 @@ describe('Nexustate', () => {
     });
 
     it('allows listeners to unlisten', () => {
-      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY });
+      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY, saveCallback: getLocalStorageSaveFunc(), loadCallback: getLocalStorageLoadFunc() });
       let untouchedData = null;
 
       const overwriteCallback = (data) => { untouchedData = data; };
@@ -136,7 +136,7 @@ describe('Nexustate', () => {
     });
 
     it('allows listeners to unlisten by component', () => {
-      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY });
+      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY, saveCallback: getLocalStorageSaveFunc(), loadCallback: getLocalStorageLoadFunc() });
       let untouchedData = null;
 
       const overwriteCallback = (data) => { untouchedData = data; };

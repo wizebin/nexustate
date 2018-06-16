@@ -1,7 +1,6 @@
 import ShardedNexustate from './ShardedNexustate';
 import { expect } from 'chai';
 import { equal } from 'assert';
-import { DEFAULT_STORAGE_KEY } from './Nexustate';
 
 describe('ShardedNexustate', () => {
   describe('general functionality', () => {
@@ -23,7 +22,7 @@ describe('ShardedNexustate', () => {
 
       defaultShard.setKey(['a', 'b'], 'hi');
 
-      expect(tempSaving).to.deep.equal([DEFAULT_STORAGE_KEY, { a: { b: 'hi' } }]);
+      expect(tempSaving).to.deep.equal(['default', { a: { b: 'hi' } }]);
     });
     it('allows multiple independent shards', () => {
       const shards = new ShardedNexustate();
@@ -41,15 +40,15 @@ describe('ShardedNexustate', () => {
           tempLoading = loading;
         }));
 
-      const tempShard = shards.getShard('temp');
+      const tempShard = shards.getShard('temp', { persist: true });
 
       defaultShard.setKey(['a', 'b'], 'hi', { immediatePersist: true }); // immediatePersist is important unless you want to delay
 
-      expect(tempSaving).to.deep.equal([DEFAULT_STORAGE_KEY, { a: { b: 'hi' } }]);
+      expect(tempSaving).to.deep.equal(['default', { a: { b: 'hi' } }]);
 
       tempShard.setKey(['c', 'd'], 'bye', { immediatePersist: true }); // immediatePersist is important unless you want to delay
 
-      expect(tempSaving).to.deep.equal([`${DEFAULT_STORAGE_KEY}_temp`, { c: { d: 'bye' } }]);
+      expect(tempSaving).to.deep.equal(['temp', { c: { d: 'bye' } }]);
     });
   });
 });

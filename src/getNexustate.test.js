@@ -1,7 +1,7 @@
 import getNexustate from './getNexustate';
-import { DEFAULT_STORAGE_KEY } from './Nexustate';
 import { expect } from 'chai';
 import { equal } from 'assert';
+import { getLocalStorageLoadFunc, getLocalStorageSaveFunc } from './Nexustate';
 const TEST_STORAGE_KEY = 'TESTTESTTEST';
 
 describe('getNexustate', () => {
@@ -13,19 +13,19 @@ describe('getNexustate', () => {
       expect(first).to.equal(second);
     });
     it('sets default options if uncreated', () => {
-      const instance = getNexustate('something', { noPersist: true });
-      const second = getNexustate('something', { noPersist: false });
+      const instance = getNexustate('something', { persist: false });
+      const second = getNexustate('something', { persist: true });
 
-      expect(instance.noPersist).to.equal(true);
-      expect(second.noPersist).to.equal(true);
+      expect(instance.persist).to.equal(false);
+      expect(second.persist).to.equal(false);
       expect(second.storageKey).to.not.equal(undefined);
     });
     it('sets storage key correctly', () => {
       const first = getNexustate();
-      const second = getNexustate('anything', { noPersist: false });
+      const second = getNexustate('anything', { persist: true, saveCallback: getLocalStorageSaveFunc(), loadCallback: getLocalStorageLoadFunc() });
       const third = getNexustate('third');
 
-      expect(first.storageKey).to.equal(DEFAULT_STORAGE_KEY);
+      expect(first.storageKey).to.equal('default');
       expect(second.storageKey).to.not.equal(first.storageKey);
       expect(third.storageKey).to.not.equal(second.storageKey);
       expect(third.storageKey).to.not.equal(first.storageKey);

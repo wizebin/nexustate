@@ -2,28 +2,39 @@ import { getObjectPath, keys, assurePathExists, has, get, set } from 'objer'
 import { findIndex, throttle, getKeyFilledObject } from './NexustateHelpers';
 import StorageManager from './StorageManager';
 
-const DEFAULT_STORAGE_KEY = '__NEXUSTATE_SAVED_DATA';
 const SAVE_THROTTLE_TIME = 100;
 
-export { DEFAULT_STORAGE_KEY };
+function missingCallback() {
+  console.error('Nexustate missing saveCallback');
+}
+
+export function getLocalStorageSaveFunc() {
+  if (typeof global !== 'undefined' && typeof global.localStorage !== 'undefined') {
+    return (key, data) => global.localStorage.setItem(key, JSON.stringify(data));
+  } else if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
+    return (key, data) => window.localStorage.setItem(key, JSON.stringify(data));
+  }
+}
+
+export function getLocalStorageLoadFunc() {
+  if (typeof global !== 'undefined' && typeof global.localStorage !== 'undefined') {
+    return (key) => JSON.parse(global.localStorage.getItem(key));
+  } else if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
+    return (key) => JSON.parse(window.localStorage.getItem(key));
+  }
+}
 
 export default class Nexustate {
-  constructor({ saveCallback = null, loadCallback = null, storageKey = DEFAULT_STORAGE_KEY, noPersist = false } = {}) {
+  static defaultSaveCallback = missingCallback;
+  static defaultLoadCallback = missingCallback;
+
+  constructor({ saveCallback = null, loadCallback = null, storageKey = 'default', persist = false } = {}) {
     this.storageManager = new StorageManager();
     this.listenerObject = { subkeys: {} };
     this.storageKey = storageKey;
-    this.saveCallback = saveCallback;
-    this.loadCallback = loadCallback;
-    if (!saveCallback) {
-      if (typeof global !== 'undefined' && typeof global.localStorage !== 'undefined') {
-        this.saveCallback = (key, data) => global.localStorage.setItem(key, JSON.stringify(data));
-        this.loadCallback = (key) => JSON.parse(global.localStorage.getItem(key));
-      } else if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
-        this.saveCallback = (key, data) => window.localStorage.setItem(key, JSON.stringify(data));
-        this.loadCallback = (key) => JSON.parse(window.localStorage.getItem(key));
-      }
-    }
-    this.noPersist = noPersist;
+    this.saveCallback = saveCallback || Nexustate.defaultSaveCallback;
+    this.loadCallback = loadCallback || Nexustate.defaultLoadCallback;
+    this.persist = persist;
   }
 
   setPersistenceFunctions = (save, load) => {
@@ -32,7 +43,7 @@ export default class Nexustate {
   }
 
   setPersist = (shouldPersist) => {
-    this.noPersist = !shouldPersist;
+    this.persist = shouldPersist;
   }
 
   /**
@@ -49,7 +60,7 @@ export default class Nexustate {
 
   setKey = (key, value, options = { immediatePersist: false, noNotify: false }) => {
     const result = this.storageManager.set(key, value, options);
-    if (!this.noPersist) this.persist(options.immediatePersist);
+    if (this.persist) this.persistData(options.immediatePersist);
     if (!options.noNotify) this.notify({ key, value });
     return result;
   }
@@ -60,13 +71,13 @@ export default class Nexustate {
 
   delete = (key, options = { immediatePersist: false, noNotify: false }) => {
     this.storageManager.delete(key);
-    if (!this.noPersist) this.persist(options.immediatePersist);
+    if (this.persist) this.persistData(options.immediatePersist);
     if (!options.noNotify) this.notify({ key, value: null });
   }
 
   push = (key, value, options = { immediatePersist: false, noNotify: false }) => {
     const result = this.storageManager.push(key, value, options);
-    if (!this.noPersist) this.persist(options.immediatePersist);
+    if (this.persist) this.persistData(options.immediatePersist);
     if (!options.noNotify) this.notify({ key, value });
     return result;
   }
@@ -106,7 +117,7 @@ export default class Nexustate {
     }
   }
 
-  persist = (immediate = false) => {
+  persistData = (immediate = false) => {
     if (immediate) {
       this.save();
     } else {
@@ -165,6 +176,7 @@ export default class Nexustate {
     }
 
     listeners.push(listener);
+    return true;
   }
 
   getListenersAtPath = (key) => {

@@ -1,13 +1,16 @@
-import Nexustate, { DEFAULT_STORAGE_KEY } from './Nexustate';
+import Nexustate from './Nexustate';
 import { values, getTypeString } from 'objer';
 
 export default class ShardedNexustate {
-  constructor() {
+  constructor({ saveCallback, loadCallback } = {}) {
     this.dataManagerShards = {
-      default: new Nexustate(),
-      cache: new Nexustate({ noPersist: true }),
+      default: new Nexustate({ persist: true, saveCallback, loadCallback }),
+      cache: new Nexustate({ persist: false, saveCallback, loadCallback }),
     };
-    this.defaultOptions = {};
+    this.defaultOptions = {
+      saveCallback,
+      loadCallback
+    };
   }
 
   setAllPersistenceFunctions(saveCallback, loadCallback) {
@@ -20,8 +23,7 @@ export default class ShardedNexustate {
 
   getShard = (shard = 'default', options) => {
     if (!this.dataManagerShards[shard]) {
-      const storageKey = shard === 'default' ? DEFAULT_STORAGE_KEY : `${DEFAULT_STORAGE_KEY}_${shard}`;
-      const passOptions = Object.assign({ storageKey }, this.defaultOptions || {}, options || {});
+      const passOptions = Object.assign({ storageKey: shard }, this.defaultOptions || {}, options || {});
       this.dataManagerShards[shard] = new Nexustate(passOptions);
     }
     return this.dataManagerShards[shard];

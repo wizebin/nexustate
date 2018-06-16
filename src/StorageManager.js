@@ -8,7 +8,7 @@ export default class StorageManager {
   set(key, value) {
     if (key === null) this.data = value;
     if (this.data === null) this.data = {};
-    set(this.data, key, value);
+    return set(this.data, key, value);
   }
 
   get(key = null) {

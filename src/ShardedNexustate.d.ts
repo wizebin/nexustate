@@ -1,10 +1,10 @@
 import Nexustate from './nexustate';
 
 type nexustateOptions = {
-  saveCallback: (string, any) => any,
+  saveCallback: (string, any) => boolean,
   loadCallback: (string) => any,
   storageKey: string,
-  noPersist: boolean
+  persist: boolean
 };
 
 type shardOptionType = {
