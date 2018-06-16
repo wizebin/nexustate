@@ -1,7 +1,7 @@
 {
   "name": "nexustate",
   "version": "1.0.20",
-  "description": "Nexusoft state management",
+  "description": "State management with listeners",
   "main": "./dist/src/index.js",
   "typings": "./src/index.d.ts",
   "scripts": {
@@ -13,9 +13,8 @@
     "nexuscript",
     "object",
     "nexustate",
-    "get",
-    "has",
-    "set"
+    "nexusoft",
+    "wizebin"
   ],
   "author": "wizebin",
   "license": "MIT",
