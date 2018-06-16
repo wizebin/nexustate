@@ -5,7 +5,7 @@ import StorageManager from './StorageManager';
 const SAVE_THROTTLE_TIME = 100;
 
 function missingCallback() {
-  console.error('Nexustate missing saveCallback');
+  console.error('Nexustate missing saveCallback', new Error().stack);
 }
 
 export function getLocalStorageSaveFunc() {
