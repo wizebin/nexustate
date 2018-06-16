@@ -3,10 +3,7 @@ import { values, getTypeString } from 'objer';
 
 export default class ShardedNexustate {
   constructor({ saveCallback, loadCallback } = {}) {
-    this.dataManagerShards = {
-      default: new Nexustate({ persist: true, saveCallback, loadCallback }),
-      cache: new Nexustate({ persist: false, saveCallback, loadCallback }),
-    };
+    this.dataManagerShards = {};
     this.defaultOptions = {
       saveCallback,
       loadCallback
