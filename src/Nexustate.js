@@ -128,9 +128,8 @@ export default class Nexustate {
   save = () => (this.saveCallback(this.storageKey, this.storageManager.get()));
   load = () => {
     const loadResults = this.loadCallback(this.storageKey);
-    const resultType = getTypeString(loadResults);
 
-    if (resultType === 'promise') {
+    if (loadResults instanceof Promise) {
       return loadResults.then(data => {
         this.storageManager.set(null, data);
       });
