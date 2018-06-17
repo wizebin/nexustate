@@ -131,11 +131,11 @@ export default class Nexustate {
 
     if (loadResults instanceof Promise) {
       return loadResults.then(data => {
-        this.storageManager.set(null, data);
+        this.setKey(null, data);
       });
     }
 
-    return this.storageManager.set(null, loadResults);
+    return this.setKey(null, loadResults);
   };
 
   throttledSave = throttle(this.save, SAVE_THROTTLE_TIME);
