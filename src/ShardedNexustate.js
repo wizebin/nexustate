@@ -41,6 +41,7 @@ export default class ShardedNexustate {
       if (typeString === 'object') {
         const { name, options } = shard;
         loadedShard = this.getShard(name, options);
+        loadedShard.setOptions(options);
       } else if (typeString === 'string') {
         loadedShard = this.getShard(shard);
       }

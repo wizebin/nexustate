@@ -37,6 +37,13 @@ export default class Nexustate {
     this.persist = persist;
   }
 
+  setOptions({ saveCallback = null, loadCallback = null, storageKey = 'default', persist = false } = {}) {
+    if (storageKey !== undefined) this.storageKey = storageKey;
+    if (saveCallback !== undefined) this.saveCallback = saveCallback;
+    if (loadCallback !== undefined) this.loadCallback = loadCallback;
+    if (persist !== undefined) this.persist = persist;
+  }
+
   setPersistenceFunctions = (save, load) => {
     this.saveCallback = save;
     this.loadCallback = load;
@@ -46,22 +53,22 @@ export default class Nexustate {
     this.persist = shouldPersist;
   }
 
-  /**
-   * Overwrites the top level values of object into the storageManager, just like react setState
-   */
-  set = (object, options = { immediatePersist: false, noNotify: false }) => {
-    const objectKeys = keys(object);
-    const result = [];
-    for (let keydex = 0; keydex < objectKeys.length; keydex += 1) {
-      result.push(this.setKey(objectKeys[keydex], object[objectKeys[keydex]], options));
-    }
+  finalizeChange(key, value, options) {
+    if (this.persist) this.persistData(options.immediatePersist);
+    if (!options.noNotify) this.notify({ key, value });
+  }
+
+  set = (key, value, options = { immediatePersist: false, noNotify: false }) => {
+    const result = this.storageManager.set(key, value);
+    this.finalizeChange(key, value, options);
     return result;
   }
 
-  setKey = (key, value, options = { immediatePersist: false, noNotify: false }) => {
-    const result = this.storageManager.set(key, value, options);
-    if (this.persist) this.persistData(options.immediatePersist);
-    if (!options.noNotify) this.notify({ key, value });
+  setKey = this.set;
+
+  assign = (key, value, options = { immediatePersist: false, noNotify: false }) => {
+    const result = this.storageManager.assign(key, value);
+    this.finalizeChange(key, value, options);
     return result;
   }
 
@@ -71,15 +78,12 @@ export default class Nexustate {
 
   delete = (key, options = { immediatePersist: false, noNotify: false }) => {
     this.storageManager.delete(key);
-    if (this.persist) this.persistData(options.immediatePersist);
-    if (!options.noNotify) this.notify({ key, value: null });
+    this.finalizeChange(key, null, options);
   }
 
   push = (key, value, options = { immediatePersist: false, noNotify: false }) => {
-    const result = this.storageManager.push(key, value, options);
-    if (this.persist) this.persistData(options.immediatePersist);
-    if (!options.noNotify) this.notify({ key, value });
-    return result;
+    const result = this.storageManager.push(key, value);
+    this.finalizeChange(key, value, options);
   }
 
   getForListener = (listener, keyChange) => {

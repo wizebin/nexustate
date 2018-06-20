@@ -1,4 +1,4 @@
-import { set, get, getObjectPath, assurePathExists } from 'objer'
+import { set, get, getObjectPath, assurePathExists, getTypeString } from 'objer'
 
 export default class StorageManager {
   constructor() {
@@ -6,9 +6,23 @@ export default class StorageManager {
   }
 
   set(key, value) {
-    if (key === null) this.data = value;
+    if (key === null) {
+      this.data = value;
+      return this.data;
+    }
     if (this.data === null) this.data = {};
     return set(this.data, key, value);
+  }
+
+  assign(key, value) {
+    const currentData = get(this.data, key);
+    const currentType = getTypeString(currentData);
+    const incomingType = getTypeString(value);
+    if (currentType === 'object' && incomingType === 'object') {
+      return this.set(key, Object.assign(currentData, value));
+    }
+
+    return this.set(key, value);
   }
 
   get(key = null) {

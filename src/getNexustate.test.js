@@ -1,6 +1,5 @@
 import getNexustate from './getNexustate';
 import { expect } from 'chai';
-import { equal } from 'assert';
 import { getLocalStorageLoadFunc, getLocalStorageSaveFunc } from './Nexustate';
 const TEST_STORAGE_KEY = 'TESTTESTTEST';
 

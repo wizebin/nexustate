@@ -9,7 +9,7 @@ describe('Nexustate', () => {
       const manager = new Nexustate({ persist: true, storageKey: TEST_STORAGE_KEY, saveCallback: getLocalStorageSaveFunc(), loadCallback: getLocalStorageLoadFunc() });
       const manager2 = new Nexustate({ persist: true, storageKey: TEST_STORAGE_KEY, saveCallback: getLocalStorageSaveFunc(), loadCallback: getLocalStorageLoadFunc() });
 
-      manager.set({ hello: 'world' }, { immediatePersist: true });
+      manager.assign(null, { hello: 'world' }, { immediatePersist: true });
 
       expect(manager.get('hello')).to.deep.equal('world');
       expect(manager2.get('hello')).to.deep.equal(undefined);
@@ -34,7 +34,7 @@ describe('Nexustate', () => {
       const manager = new Nexustate({ persist: false, storageKey: TEST_STORAGE_KEY });
       const manager2 = new Nexustate({ persist: false, storageKey: TEST_STORAGE_KEY, loadCallback: () => ({}) });
 
-      manager.set({ NO: 'SAVING' }, { immediatePersist: true });
+      manager.assign(null, { NO: 'SAVING' }, { immediatePersist: true });
       manager2.load();
 
       expect(manager.get('NO')).to.deep.equal('SAVING');
