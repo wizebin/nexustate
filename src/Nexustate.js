@@ -93,11 +93,6 @@ export default class Nexustate {
     return { keyChange, alias, callback, key, value: transform ? transform(value) : value };
   }
 
-  notifyListenerOfChange = (listener, keyChange) => {
-    const { callback } = listener;
-    callback(this.getForListener(listener, keyChange));
-  }
-
   batchAndNotifyOfChanges(changeWithListener) {
     const result = [];
     const callbackBatches = []; // Use this to detect multiple listeners, okay for now, need to use an object somehow in the future
