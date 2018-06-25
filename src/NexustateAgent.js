@@ -1,4 +1,4 @@
-import { set } from 'objer';
+import { set, values } from 'objer';
 import clone from 'clone';
 import getShardedNexustate from './getShardedNexustate';
 
@@ -110,6 +110,10 @@ export default class NexustateAgent {
 
   push = (path, data, { shard = 'default' } = {}) => {
     return this.shardState.getShard(shard).push(path, data);
+  }
+
+  assign = (path, data, { shard = 'default' } = {}) => {
+    return this.shardState.getShard(shard).assign(path, data);
   }
 
   getShard = (shard = 'default') => {

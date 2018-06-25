@@ -88,6 +88,7 @@ export class NexustateAgent {
     set(path: KeyType, data: any, { shard: string } = {}): any;
     push(path: KeyType, data: any, { shard: string } = {}): any;
     getShard(shard: string): Nexustate;
+    cleanup(): void;
 }
 
 type SaveCallbackFunc = (string, any) => boolean;
