@@ -1,6 +1,7 @@
 import NexustateAgent from './NexustateAgent';
 import { expect } from 'chai';
 import ShardedNexustate from './ShardedNexustate';
+import Nexustate from './Nexustate';
 
 describe('Nexustate Agent', () => {
   describe('General Functionality', () => {
@@ -57,6 +58,14 @@ describe('Nexustate Agent', () => {
       // The data ends up in different forms depending on aliases and transform functions
       expect(tempData).to.deep.equal({ foop: { a: 'b' } });
       expect(tempData2).to.deep.equal({ foop2: 'first99' });
+    });
+    it('Executes initial load successfully', () => {
+      const state = new ShardedNexustate();
+      state.getShard().set('test', 'value');
+      let tempData;
+      const agent = new NexustateAgent({ onChange: data => (tempData = data), shardedNexustate: state });
+      agent.listen({ key: 'test', initialLoad: true });
+      expect(tempData).to.deep.equal({ test: 'value' });
     });
   });
 });

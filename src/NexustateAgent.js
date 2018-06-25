@@ -49,28 +49,38 @@ export default class NexustateAgent {
   }
 
   setComposedState = (key, value) => {
-    this.data = this.getComposedState(this.data, key, value)
+    this.data = this.getComposedState(this.data, key, value);
   }
 
-  listen = (listener = { shard: 'default', key: '', alias: null, transform: null, initialLoad: true, noChildUpdates: false, noParentUpdates: false }) => {
+  listen = (listener = { shard: 'default', key: '', alias: null, transform: null, initialLoad: true, noChildUpdates: false, noParentUpdates: false }, partOfMultiListen = false) => {
     const manager = this.shardState.getShard(listener.shard);
     const modifiedListener = { ...listener, callback: this.handleChange, component: this };
     manager.listen(modifiedListener);
 
     if (listener.initialLoad) {
       const listenData = manager.getForListener(modifiedListener);
-      this.setComposedState(listenData.alias || listenData.key, listenData.value)
+      this.setComposedState(listenData.alias || listenData.key, listenData.value);
+      if (!partOfMultiListen && this.onChange) {
+        this.onChange(this.data);
+      }
     }
   }
 
   multiListen = (listeners, { initialLoad = false } = {}) => {
+    let loaded = false;
+
     for (let listenerdex = 0; listenerdex < listeners.length; listenerdex += 1) {
-      this.listenForChange(listeners[listenerdex]);
+      this.listen(listeners[listenerdex], true);
       if (initialLoad) {
+        loaded = true;
         const manager = this.shardState.getShard(listeners[listenerdex].shard || 'default');
         const listenData = manager.getForListener(listeners[listenerdex]);
         this.setComposedState(listenData.alias || listenData.key, listenData.value)
       }
+    }
+
+    if (loaded && this.onChange) {
+      this.onChange(this.data);
     }
   }
 
