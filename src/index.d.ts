@@ -62,6 +62,34 @@ export class Nexustate {
     unlistenComponent(component: any, basePath?: KeyType): void;
 }
 
+type ChangeCallbackFunc = (any) => void;
+type ListenOptions = {
+    shard: string,
+    key: KeyType,
+    alias: string,
+    transform: NexustateTransform,
+    initialLoad: boolean,
+    noChildUpdates: boolean,
+    noParentUpdates: boolean,
+};
+
+export class NexustateAgent {
+    constructor(shardedNexustate: ShardedNexustate, cloneBeforeSet: boolean, onChange: ChangeCallbackFunc);
+
+    createShard(shard: string, options: any): Nexustate;
+    unlisten(path: KeyType, { shard: string, resetState: boolean } = {}): boolean;
+    unlistenFromAll({ resetState: boolean } = {}): void;
+    setComposedState(path: KeyType, value: any): void;
+    listen(options: ListenOptions): void;
+    multiListen(listeners: ListenOptions[], { initialLoad: boolean } = {}): void;
+    handleChange(changeEvents: any[]): void;
+    get(path: KeyType, { shard: string } = {}): any;
+    delete(path: KeyType, { shard: string } = {}): boolean;
+    set(path: KeyType, data: any, { shard: string } = {}): any;
+    push(path: KeyType, data: any, { shard: string } = {}): any;
+    getShard(shard: string): Nexustate;
+}
+
 type SaveCallbackFunc = (string, any) => boolean;
 type LoadCallbackFunc = (string) => any;
 
