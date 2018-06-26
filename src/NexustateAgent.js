@@ -105,6 +105,10 @@ export default class NexustateAgent {
   }
 
   set = (path, data, { shard = 'default' } = {}) => {
+    return this.shardState.getShard(shard).set(path, data);
+  }
+
+  setKey = (path, data, { shard = 'default' } = {}) => {
     return this.shardState.getShard(shard).setKey(path, data);
   }
 
