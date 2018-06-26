@@ -6,7 +6,7 @@ export default class StorageManager {
   }
 
   set(key, value) {
-    if (key === null) {
+    if (key === null || key === []) {
       this.data = value;
       return this.data;
     }
