@@ -37,7 +37,7 @@ export default class Nexustate {
     this.persist = persist;
   }
 
-  setOptions({ saveCallback = null, loadCallback = null, storageKey = 'default', persist = false } = {}) {
+  setOptions({ saveCallback, loadCallback, storageKey, persist } = {}) {
     if (storageKey !== undefined) this.storageKey = storageKey;
     if (saveCallback !== undefined) this.saveCallback = saveCallback;
     if (loadCallback !== undefined) this.loadCallback = loadCallback;
