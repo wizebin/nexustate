@@ -1,7 +1,6 @@
 import { getObjectPath, keys, assurePathExists, has, get, set, getTypeString, values } from 'objer'
 import { findIndex, throttle, getKeyFilledObject } from './NexustateHelpers';
 import StorageManager from './StorageManager';
-import { CLIENT_RENEG_WINDOW } from 'tls';
 
 const SAVE_THROTTLE_TIME = 100;
 
