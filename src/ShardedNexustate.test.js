@@ -67,7 +67,6 @@ describe('ShardedNexustate', () => {
         expect(state.getShard('default').persist).to.deep.equal(true);
         expect(state.getShard('third').persist).to.deep.equal(false);
       });
-
     });
   });
 });

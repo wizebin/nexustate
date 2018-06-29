@@ -1,6 +1,7 @@
-import { getObjectPath, keys, assurePathExists, has, get, set, getTypeString } from 'objer'
+import { getObjectPath, keys, assurePathExists, has, get, set, getTypeString, values } from 'objer'
 import { findIndex, throttle, getKeyFilledObject } from './NexustateHelpers';
 import StorageManager from './StorageManager';
+import { CLIENT_RENEG_WINDOW } from 'tls';
 
 const SAVE_THROTTLE_TIME = 100;
 
@@ -53,22 +54,29 @@ export default class Nexustate {
     this.persist = shouldPersist;
   }
 
-  finalizeChange(key, value, options) {
+  getChangeNotificationBatch(key, value, options) {
+    if (!options.noNotify) return this.getNotifyBatch({ key, value });
+    return [];
+  }
+
+  finalizeChange(batch, options) {
     if (this.persist) this.persistData(options.immediatePersist);
-    if (!options.noNotify) this.notify({ key, value });
+    if (!options.noNotify) this.executeNotifyBatch(batch);
   }
 
   set = (key, value, options = { immediatePersist: false, noNotify: false }) => {
+    const batch = this.getChangeNotificationBatch(key, value, options);
     const result = this.storageManager.set(key, value);
-    this.finalizeChange(key, value, options);
+    this.finalizeChange(batch, options);
     return result;
   }
 
   setKey = this.set;
 
   assign = (key, value, options = { immediatePersist: false, noNotify: false }) => {
+    const batch = this.getChangeNotificationBatch(key, value, options);
     const result = this.storageManager.assign(key, value);
-    this.finalizeChange(key, value, options);
+    this.finalizeChange(batch, options);
     return result;
   }
 
@@ -77,13 +85,16 @@ export default class Nexustate {
   }
 
   delete = (key, options = { immediatePersist: false, noNotify: false }) => {
+    const batch = this.getChangeNotificationBatch(key, null, options);
     this.storageManager.delete(key);
-    this.finalizeChange(key, null, options);
+    this.finalizeChange(batch, options);
   }
 
   push = (key, value, options = { immediatePersist: false, noNotify: false }) => {
+    const batch = this.getChangeNotificationBatch(key, value, options);
     const result = this.storageManager.push(key, value);
-    this.finalizeChange(key, value, options);
+    this.finalizeChange(batch, options);
+    return result;
   }
 
   getForListener = (listener, keyChange) => {
@@ -93,12 +104,12 @@ export default class Nexustate {
     return { keyChange, alias, callback, key, value: transform ? transform(value) : value };
   }
 
-  batchAndNotifyOfChanges(changeWithListener) {
+  executeNotifyBatch(notifyBatch) {
     const result = [];
     const callbackBatches = []; // Use this to detect multiple listeners, okay for now, need to use an object somehow in the future
     // [{ callback: () => {}, changes: [{ getForListener() Result }]}]
-    for (let keydex = 0; keydex < changeWithListener.length; keydex += 1) {
-      const keyChange = changeWithListener[keydex];
+    for (let keydex = 0; keydex < notifyBatch.length; keydex += 1) {
+      const keyChange = notifyBatch[keydex];
       const listenerIndex = findIndex(callbackBatches, callbackBatch => callbackBatch.callback === keyChange.listener.callback);
 
       if (listenerIndex !== -1) {
@@ -166,11 +177,79 @@ export default class Nexustate {
     return result;
   }
 
-  notify = ({ key, value }) => {
-    // TODO: Notify about values that are being removed
+  getAllChildListeners = (listenerObject, currentKey = []) => {
+    let result = [];
+    const currentListeners = get(listenerObject, 'listeners') || [];
+    const subkeyObject = get(listenerObject, 'subkeys') || {};
+    const subkeys = keys(subkeyObject);
+    for (let listenerdex = 0; listenerdex < currentListeners.length; listenerdex += 1) {
+      result.push({ listener: currentListeners[listenerdex], key: currentKey })
+    }
+    for (let keydex = 0; keydex < subkeys.length; keydex += 1) {
+      const subkey = subkeys[keydex];
+      result = result.concat(this.getAllChildListeners(subkeyObject[subkey], currentKey.concat(subkey)));
+    }
+    return result;
+  }
+
+  getMissingChildListeners = (original, incoming, listenerObject, currentKey = []) => {
+    // recurse original against incoming for changed keys, if original type is an object or array and incoming type is not the same
+    // pass all child listeners. If incoming and original are both either objects or arrays, recurse the children using this function.
+    let result = [];
+    const originalType = getTypeString(original);
+    if (originalType === 'object' || originalType === 'array') {
+      const incomingType = getTypeString(incoming);
+      if (incomingType !== originalType) {
+        result = result.concat(this.getAllChildListeners(listenerObject, currentKey));
+        // Send delete notification to every child of the original key
+      } else {
+        const originalKeys = keys(original);
+        if (has(listenerObject, 'subkeys')) {
+          for (let keydex = 0; keydex < originalKeys.length; keydex += 1) {
+            const originalKey = originalKeys[keydex];
+            if (has(listenerObject.subkeys, originalKey)) {
+              if (!has(incoming, originalKey)) {
+                result = result.concat(this.getAllChildListeners(listenerObject.subkeys[originalKey], currentKey.concat(originalKey)));
+              } else {
+                result = result.concat(this.getMissingChildListeners(get(original, originalKey), get(incoming, originalKey), listenerObject.subkeys[originalKey], currentKey.concat(originalKey)));
+              }
+            }
+          }
+        }
+        // Recursively check children against incoming, for any missing keys send deletion, additions and changes are handled by other recurse function
+      }
+    }
+    return result;
+  }
+
+  getListenerObjectAtKey(key) {
+    let result = this.listenerObject;
+    for (let keydex = 0; keydex < key.length; keydex += 1) {
+      if (has(result, ['subkeys', key[keydex]])) {
+        result = result.subkeys[key[keydex]];
+      } else {
+        return null;
+      }
+    }
+    return result;
+  }
+
+  recurseDeletedPathsForListeners({ key, value }) {
+    const original = this.storageManager.get(key);
+    const listeners = this.getMissingChildListeners(original, value, this.getListenerObjectAtKey(key), key);
+    return listeners;
+  }
+
+  getNotifyBatch = ({ key, value }) => {
     const keyArray = key !== null ? getObjectPath(key) : [];
     const listenersWithKeys = this.recurseMatchingPathsForListeners(getKeyFilledObject(key, value), this.listenerObject, [], keyArray.length); // this kills the specificity arrangement
-    this.batchAndNotifyOfChanges(listenersWithKeys);
+    const deletersWithKeys = this.recurseDeletedPathsForListeners({ key: keyArray, value }); // this kills the
+
+    return listenersWithKeys.concat(deletersWithKeys);
+  }
+
+  notify = ({ key, value }) => {
+    this.executeNotifyBatch(this.getNotifyBatch({ key, value }));
   }
 
   listen = (listener = { key: null, callback: () => {}, alias: null, component: null, transform: null, noChildUpdates: false }) => {

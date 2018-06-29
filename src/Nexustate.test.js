@@ -52,6 +52,46 @@ describe('Nexustate', () => {
       expect(passedData[0].value).to.deep.equal('Hello world');
     });
 
+    it('allows assign, set, and delete', () => {
+      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY, saveCallback: getLocalStorageSaveFunc(), loadCallback: getLocalStorageLoadFunc() });
+
+      manager.setKey(['a', 'b'], 'Hello world');
+      manager.assign('a', { c: 'ohio' })
+      expect(manager.get([])).to.deep.equal({ a: { b: 'Hello world', c: 'ohio' } });
+
+      manager.set('a', { c: 'ohio' })
+      expect(manager.get([])).to.deep.equal({ a: { c: 'ohio' } });
+
+      manager.delete(['a', 'c'])
+      expect(manager.get([])).to.deep.equal({ a: {} });
+    });
+
+    it('notifies children of deletion', () => {
+      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY, saveCallback: getLocalStorageSaveFunc(), loadCallback: getLocalStorageLoadFunc() });
+
+      manager.set([], { a: { b: { c: 'hi', d: { e: 'nested' } } } });
+
+      let passedData = null;
+      const callback = changes => { passedData = changes; };
+      manager.listen({ key: 'a.b.c', callback, alias: 'boop' });
+      manager.delete(['a', 'b']);
+
+      expect(passedData.length).to.deep.equal(1);
+      expect(passedData[0].value).to.deep.equal(undefined);
+
+
+      manager.set([], { a: { b: { c: 'hi', d: { e: 'nested' } } } });
+
+      passedData = null;
+
+      manager.listen({ key: 'a.b.d.e', callback, alias: 'flop' });
+      manager.set('a.b.d', { f: 'not nested' });
+
+      expect(passedData.length).to.deep.equal(1);
+      expect(passedData[0].key).to.deep.equal('a.b.d.e');
+      expect(passedData[0].value).to.deep.equal(undefined);
+    });
+
     it('notifies listeners of multiple changes in one event', () => {
       const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY, saveCallback: getLocalStorageSaveFunc(), loadCallback: getLocalStorageLoadFunc() });
       let passedData = null;
