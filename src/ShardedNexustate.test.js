@@ -50,5 +50,24 @@ describe('ShardedNexustate', () => {
 
       expect(tempSaving).to.deep.equal(['temp', { c: { d: 'bye' } }]);
     });
+    it('loads shards using loadShards', () => {
+      const state = new ShardedNexustate({ saveCallback: () => {}, loadCallback: name => Promise.resolve({ name }) });
+      state.loadShards([
+        { name: 'default', persist: true },
+        { name: 'test', persist: true },
+        { name: 'third', persist: false },
+      ]).then(result => {
+        expect(state.getAllShards()).to.have.keys(['default', 'test', 'third']);
+
+        expect(state.getShard('test').get([])).to.deep.equal({ name: 'test' });
+        expect(state.getShard('default').get([])).to.deep.equal({ name: 'default' });
+        expect(state.getShard('third').get([])).to.deep.equal({ name: 'third' });
+
+        expect(state.getShard('test').persist).to.deep.equal(true);
+        expect(state.getShard('default').persist).to.deep.equal(true);
+        expect(state.getShard('third').persist).to.deep.equal(false);
+      });
+
+    });
   });
 });

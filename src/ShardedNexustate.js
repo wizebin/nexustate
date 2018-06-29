@@ -35,20 +35,28 @@ export default class ShardedNexustate {
   }
 
   loadShards = (shardList) => {
+    const promises = [];
     (shardList || []).forEach(shard => {
       const typeString = getTypeString(shard);
       let loadedShard = null;
       if (typeString === 'object') {
-        const { name, options } = shard;
-        loadedShard = this.getShard(name, options);
-        loadedShard.setOptions(options);
+        const { name, persist } = shard;
+        loadedShard = this.getShard(name, { persist });
+        loadedShard.setOptions({ persist });
       } else if (typeString === 'string') {
         loadedShard = this.getShard(shard);
       }
 
       if (loadedShard) {
-        loadedShard.load();
+        const loadResult = loadedShard.load();
+        const loadResultType = getTypeString(loadResult);
+        if (loadResultType === 'promise' || loadResult instanceof Promise) {
+          promises.push(loadResult);
+        } else {
+          promises.push(Promise.resolve(loadResult));
+        }
       }
     });
+    return Promise.all(promises);
   }
 }

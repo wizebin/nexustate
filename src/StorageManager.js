@@ -6,7 +6,7 @@ export default class StorageManager {
   }
 
   set(key, value) {
-    if (key === null || key === []) {
+    if (key === null || (key instanceof Array && key.length === 0)) {
       this.data = value;
       return this.data;
     }
@@ -40,8 +40,12 @@ export default class StorageManager {
     if (value instanceof Array && toString.call(finalKey) === '[object Number]') {
       value.splice(finalKey, 1);
     } else {
-      delete value[finalKey];
+      if (getTypeString(value) === 'object') {
+        delete value[finalKey];
+        return true;
+      }
     }
+    return false;
   }
 
   push(key, value) {

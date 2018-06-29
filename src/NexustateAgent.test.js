@@ -14,18 +14,17 @@ describe('Nexustate Agent', () => {
       const agent2 = new NexustateAgent({ onChange: data => (tempData2 = data) });
 
       // The agents are listening to the same data, but aliased to different keys
-      agent.listen({ key: 'test', alias: 'foop' });
-      agent2.listen({ key: 'test', alias: 'bar' });
+      agent.listen({ key: 'test', alias: 'foop', initialLoad: false });
+      agent2.listen({ key: 'test', alias: 'bar', initialLoad: false });
 
       // The agents are using different transform functions
-      agent.listen({ shard: 'second', key: 'barge', alias: 'foop2', transform: thing => 'first' + thing });
-      agent2.listen({ shard: 'second', key: 'barge', alias: 'baz', transform: thing => 'second' + thing });
+      agent.listen({ shard: 'second', key: 'barge', alias: 'foop2', initialLoad: false, transform: thing => 'first' + thing });
+      agent2.listen({ shard: 'second', key: 'barge', alias: 'baz', initialLoad: false, transform: thing => 'second' + thing });
 
       agent.set('test', { a: 'b' });
 
       expect(tempData).to.deep.equal({ foop: { a: 'b' } });
       expect(tempData2).to.deep.equal({ bar: { a: 'b' } });
-
       agent.set('barge', 99, { shard: 'second' });
 
       // The data ends up in different forms depending on aliases and transform functions
@@ -42,11 +41,11 @@ describe('Nexustate Agent', () => {
       const agent = new NexustateAgent({ onChange: data => (tempData = data), shardedNexustate: state1 });
       const agent2 = new NexustateAgent({ onChange: data => (tempData2 = data), shardedNexustate: state2 });
 
-      agent.listen({ key: 'test', alias: 'foop' });
-      agent2.listen({ key: 'test', alias: 'foop' });
+      agent.listen({ key: 'test', alias: 'foop', initialLoad: false, });
+      agent2.listen({ key: 'test', alias: 'foop', initialLoad: false, });
 
-      agent.listen({ shard: 'second', key: 'barge', alias: 'foop2', transform: thing => 'first' + thing });
-      agent2.listen({ shard: 'second', key: 'barge', alias: 'foop2', transform: thing => 'first' + thing });
+      agent.listen({ shard: 'second', key: 'barge', alias: 'foop2', initialLoad: false, transform: thing => 'first' + thing });
+      agent2.listen({ shard: 'second', key: 'barge', alias: 'foop2', initialLoad: false, transform: thing => 'first' + thing });
 
       agent.set('test', { a: 'b' });
 
@@ -62,10 +61,20 @@ describe('Nexustate Agent', () => {
     it('Executes initial load successfully', () => {
       const state = new ShardedNexustate();
       state.getShard().set('test', 'value');
+      state.getShard().set('test2', 'value2');
+      const agent = new NexustateAgent({ shardedNexustate: state });
+      agent.listen({ key: 'test', initialLoad: true });
+      expect(agent.data).to.deep.equal({ test: 'value' });
+      agent.listen({ key: 'test2' });
+      expect(agent.data).to.deep.equal({ test: 'value', test2: 'value2' });
+    });
+    it('Uses nested aliases correctly', () => {
+      const state = new ShardedNexustate();
+      state.getShard().set('test', 'value');
       let tempData;
       const agent = new NexustateAgent({ onChange: data => (tempData = data), shardedNexustate: state });
-      agent.listen({ key: 'test', initialLoad: true });
-      expect(tempData).to.deep.equal({ test: 'value' });
+      agent.listen({ key: 'test', alias: 'deep.nested.test', initialLoad: true });
+      expect(tempData).to.deep.equal({ deep: { nested: { test: 'value' } } });
     });
   });
 });

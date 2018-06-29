@@ -52,12 +52,22 @@ export default class NexustateAgent {
     this.data = this.getComposedState(this.data, key, value);
   }
 
-  listen = (listener = { shard: 'default', key: '', alias: null, transform: null, initialLoad: true, noChildUpdates: false, noParentUpdates: false }, partOfMultiListen = false) => {
-    const manager = this.shardState.getShard(listener.shard);
-    const modifiedListener = { ...listener, callback: this.handleChange, component: this };
+  listen = ({ shard = 'default', key, alias, transform, initialLoad = true, noChildUpdates, noParentUpdates }, partOfMultiListen = false) => {
+    const manager = this.shardState.getShard(shard);
+    const modifiedListener = {
+      shard,
+      key,
+      alias,
+      transform,
+      initialLoad,
+      noChildUpdates,
+      noParentUpdates,
+      callback: this.handleChange,
+      component: this
+    };
     manager.listen(modifiedListener);
 
-    if (listener.initialLoad) {
+    if (initialLoad) {
       const listenData = manager.getForListener(modifiedListener);
       this.setComposedState(listenData.alias || listenData.key, listenData.value);
       if (!partOfMultiListen && this.onChange) {
