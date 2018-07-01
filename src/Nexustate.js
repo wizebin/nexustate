@@ -1,6 +1,7 @@
 import { getObjectPath, keys, assurePathExists, has, get, set, getTypeString, values } from 'objer'
 import { findIndex, throttle, getKeyFilledObject } from './NexustateHelpers';
 import StorageManager from './StorageManager';
+import { isBlankKey } from './utility/blankKey';
 
 const SAVE_THROTTLE_TIME = 100;
 
@@ -267,7 +268,7 @@ export default class Nexustate {
   }
 
   getListenersAtPath = (key) => {
-    if (key === null) return assurePathExists(this.listenerObject, 'listeners', []);
+    if (isBlankKey(key)) return assurePathExists(this.listenerObject, 'listeners', []);
     const keyArray = getObjectPath(key);
 
     let currentListenObject = this.listenerObject;

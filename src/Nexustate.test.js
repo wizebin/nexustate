@@ -52,6 +52,28 @@ describe('Nexustate', () => {
       expect(passedData[0].value).to.deep.equal('Hello world');
     });
 
+    it('notifies null key listeners of changes', () => {
+      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY, saveCallback: getLocalStorageSaveFunc(), loadCallback: getLocalStorageLoadFunc() });
+      let passedData = null;
+      const callback = changes => { passedData = changes; };
+
+      manager.listen({ key: null, callback, alias: 'boop' });
+      manager.setKey(['a', 'b'], 'Hello world');
+      expect(passedData.length).to.deep.equal(1);
+      expect(passedData[0].value).to.deep.equal({ a: { b: 'Hello world' } });
+    });
+
+    it('notifies blank key listeners of changes', () => {
+      const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY, saveCallback: getLocalStorageSaveFunc(), loadCallback: getLocalStorageLoadFunc() });
+      let passedData = null;
+      const callback = changes => { passedData = changes; };
+
+      manager.listen({ key: [], callback, alias: 'boop' });
+      manager.setKey(['a', 'b'], 'Hello world');
+      expect(passedData.length).to.deep.equal(1);
+      expect(passedData[0].value).to.deep.equal({ a: { b: 'Hello world' } });
+    });
+
     it('allows assign, set, and delete', () => {
       const manager = new Nexustate({ storageKey: TEST_STORAGE_KEY, saveCallback: getLocalStorageSaveFunc(), loadCallback: getLocalStorageLoadFunc() });
 

@@ -3,4 +3,4 @@
 --require ./mocha_babel_hook.js
 --require mock-local-storage
 --recursive
-./src/*.test.js
+./src/**/*.test.js

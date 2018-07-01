@@ -1,4 +1,5 @@
 import { set, get, getObjectPath, assurePathExists, getTypeString } from 'objer'
+import { isBlankKey } from './utility/blankKey';
 
 export default class StorageManager {
   constructor() {
@@ -6,7 +7,7 @@ export default class StorageManager {
   }
 
   set(key, value) {
-    if (key === null || (key instanceof Array && key.length === 0)) {
+    if (isBlankKey(key)) {
       this.data = value;
       return this.data;
     }
@@ -26,8 +27,7 @@ export default class StorageManager {
   }
 
   get(key = null) {
-    if (key === null) return this.data;
-    return get(this.data, key);
+    return isBlankKey(key) ? this.data : get(this.data, key);
   }
 
   delete(key) {
@@ -49,32 +49,32 @@ export default class StorageManager {
   }
 
   push(key, value) {
-    if (key === null) this.data.push(value);
+    if (isBlankKey(key)) this.data.push(value);
     if (this.data === null) this.data = {};
     assurePathExists(this.data, key, []);
     this.get(key).push(value);
   }
 
   pop(key, value) {
-    if (key === null) this.data.pop(value);
+    if (isBlankKey(key)) this.data.pop(value);
     if (this.data === null) this.data = {};
     get(this.data, key).pop(value);
   }
 
   unshift(key, value) {
-    if (key === null) this.data.unshift(value);
+    if (isBlankKey(key)) this.data.unshift(value);
     if (this.data === null) this.data = {};
     get(this.data, key).unshift(value);
   }
 
   shift(key, value) {
-    if (key === null) this.data.shift(value);
+    if (isBlankKey(key)) this.data.shift(value);
     if (this.data === null) this.data = {};
     get(this.data, key).shift(value);
   }
 
   splice(key, index, length) {
-    if (key === null) this.data.splice(index, length);
+    if (isBlankKey(key)) this.data.splice(index, length);
     if (this.data === null) this.data = {};
     get(this.data, key).splice(index, length);
   }
