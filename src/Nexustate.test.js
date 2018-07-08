@@ -218,5 +218,42 @@ describe('Nexustate', () => {
       manager.setKey(['a', 'b'], 'Hello world');
       expect(untouchedData).to.equal(null);
     });
+
+    describe('wraps essential functions from storageManager', () => {
+      it('wraps assureExists', () => {
+        const manager = new Nexustate();
+        let gotCalled = false;
+        manager.listen({ key: 'a.b.c', callback: () => {gotCalled = true} });
+        manager.assureExists('a.b.c', 'testme');
+        expect(manager.get(null)).to.deep.equal({ a: { b: { c: 'testme' }}})
+        expect(gotCalled).to.equal(true);
+      });
+      it('wraps has', () => {
+        const manager = new Nexustate();
+        expect(manager.has('a.b.c')).to.equal(false);
+        manager.set('a.b.c', 2193923);
+        let gotCalled = false;
+        manager.listen({ key: 'a.b.c', callback: () => {gotCalled = true} });
+        expect(manager.has('a.b.c')).to.equal(true);
+        expect(gotCalled).to.equal(false);
+      });
+      it('wraps get with default', () => {
+        const manager = new Nexustate();
+        let gotCalled = false;
+        manager.listen({ key: 'a.b.c', callback: () => {gotCalled = true} });
+        expect(manager.get('a.b.c')).to.equal(undefined);
+        expect(manager.get('a.b.c', 'defaut')).to.equal('defaut');
+        expect(gotCalled).to.equal(false);
+      });
+      it('wraps assign', () => {
+        const manager = new Nexustate();
+        manager.set('d.e.f', { p: 1 });
+        let gotCalled = false;
+        manager.listen({ key: 'd.e.f', callback: () => {gotCalled = true} });
+        manager.assign(['d', 'e', 'f'], { q: 9 });
+        expect(manager.get('d.e.f')).to.deep.equal({ p: 1, q: 9 })
+        expect(gotCalled).to.equal(true);
+      });
+    });
   });
 });

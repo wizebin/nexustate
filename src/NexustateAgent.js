@@ -106,8 +106,8 @@ export default class NexustateAgent {
     }
   }
 
-  get = (path, { shard = 'default' } = {}) => {
-    return this.shardState.getShard(shard).get(path);
+  get = (path, { defaultValue = undefined, shard = 'default' } = {}) => {
+    return this.shardState.getShard(shard).get(path, defaultValue);
   }
 
   delete = (path, { shard = 'default' } = {}) => {
@@ -128,6 +128,10 @@ export default class NexustateAgent {
 
   assign = (path, data, { shard = 'default' } = {}) => {
     return this.shardState.getShard(shard).assign(path, data);
+  }
+
+  assureExists = (path, defaultValue, { shard = 'default' } = {}) => {
+    return this.shardState.getShard(shard).assureExists(path, defaultValue);
   }
 
   getShard = (shard = 'default') => {

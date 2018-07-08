@@ -1,4 +1,4 @@
-import { set, get, getObjectPath, assurePathExists, getTypeString } from 'objer'
+import { set, has, get, getObjectPath, assurePathExists, getTypeString } from 'objer'
 import { isBlankKey } from './utility/blankKey';
 
 export default class StorageManager {
@@ -26,8 +26,24 @@ export default class StorageManager {
     return this.set(key, value);
   }
 
-  get(key = null) {
-    return isBlankKey(key) ? this.data : get(this.data, key);
+  assureExists(key, defaultValue) {
+    if (isBlankKey(key)) {
+      if (this.data === undefined) {
+        this.data = defaultValue;
+        return true;
+      }
+    } else {
+      return assurePathExists(this.data, key, defaultValue);
+    }
+    return false;
+  }
+
+  get(key = null, defaultValue) {
+    return isBlankKey(key) ? this.data : get(this.data, key, defaultValue);
+  }
+
+  has(key = null) {
+    return isBlankKey(key) ? this.data !== undefined : has(this.data, key);
   }
 
   delete(key) {

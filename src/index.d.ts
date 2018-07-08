@@ -60,6 +60,10 @@ export class Nexustate {
     unlisten(key: KeyType, callback: NexustateChangeCallback): void;
 
     unlistenComponent(component: any, basePath?: KeyType): void;
+
+    has(key: KeyType): boolean;
+
+    assureExists(key: KeyType, defaultValue: any): boolean;
 }
 
 type ChangeCallbackFunc = (any) => void;
@@ -89,6 +93,8 @@ export class NexustateAgent {
     push(path: KeyType, data: any, { shard: string } = {}): any;
     getShard(shard: string): Nexustate;
     cleanup(): void;
+    assureExists(path: KeyType, defaultValue: any, { shard: string } = {}): boolean;
+    has(path: KeyType, { shard: string } = {}): boolean;
 }
 
 type SaveCallbackFunc = (string, any) => boolean;

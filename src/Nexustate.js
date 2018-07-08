@@ -25,6 +25,8 @@ export function getLocalStorageLoadFunc() {
   }
 }
 
+const DEFAULT_OPTIONS = { immediatePersist: false, noNotify: false };
+
 export default class Nexustate {
   static defaultSaveCallback = missingCallback;
   static defaultLoadCallback = missingCallback;
@@ -64,37 +66,46 @@ export default class Nexustate {
     if (!options.noNotify) this.executeNotifyBatch(batch);
   }
 
-  set = (key, value, options = { immediatePersist: false, noNotify: false }) => {
-    const batch = this.getChangeNotificationBatch(key, value, options);
-    const result = this.storageManager.set(key, value);
-    this.finalizeChange(batch, options);
-    return result;
+  get = (key = null, defaultValue) => {
+    return this.storageManager.get(key, defaultValue);
   }
 
-  setKey = this.set;
-
-  assign = (key, value, options = { immediatePersist: false, noNotify: false }) => {
-    const batch = this.getChangeNotificationBatch(key, value, options);
-    const result = this.storageManager.assign(key, value);
-    this.finalizeChange(batch, options);
-    return result;
+  createPassthroughKeyValueFunction = (functionName) => {
+    return (key, value, options = DEFAULT_OPTIONS) => {
+      const batch = this.getChangeNotificationBatch(key, value, options);
+      const result = this.storageManager[functionName](key, value, options);
+      this.finalizeChange(batch, options);
+      return result;
+    }
   }
 
-  get = (key = null) => {
-    return this.storageManager.get(key);
+  createPassthroughKeyOnlyFunction = (functionName, notificationValue) => {
+    return (key, options = DEFAULT_OPTIONS) => {
+      const batch = this.getChangeNotificationBatch(key, notificationValue, options);
+      const result = this.storageManager[functionName](key, options);
+      this.finalizeChange(batch, options);
+      return result;
+    }
   }
 
-  delete = (key, options = { immediatePersist: false, noNotify: false }) => {
-    const batch = this.getChangeNotificationBatch(key, null, options);
-    this.storageManager.delete(key);
-    this.finalizeChange(batch, options);
+  assign = this.createPassthroughKeyValueFunction('assign', ['key', 'value']);
+  set = this.createPassthroughKeyValueFunction('set', ['key', 'value']);
+  setKey = this.createPassthroughKeyValueFunction('set', ['key', 'value']);
+  push = this.createPassthroughKeyValueFunction('push', ['key', 'value']);
+  pop = this.createPassthroughKeyValueFunction('pop', ['key']);
+  // splice = this.createPassthroughKeyValueFunction('splice', ['key', 'index', 'length']);
+  // unshift = this.createPassthroughKeyValueFunction('unshift', ['key']);
+  // shift = this.createPassthroughKeyValueFunction('shift', ['key']);
+  delete = this.createPassthroughKeyOnlyFunction('delete', null, ['key']);
+
+  assureExists = (key, defaultValue, options = DEFAULT_OPTIONS) => {
+    if (!this.has(key)) {
+      return this.set(key, defaultValue, options);
+    }
   }
 
-  push = (key, value, options = { immediatePersist: false, noNotify: false }) => {
-    const batch = this.getChangeNotificationBatch(key, value, options);
-    const result = this.storageManager.push(key, value);
-    this.finalizeChange(batch, options);
-    return result;
+  has = (key = null) => {
+    return this.storageManager.has(key);
   }
 
   getForListener = (listener, keyChange) => {
