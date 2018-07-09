@@ -1,6 +1,6 @@
 {
   "name": "nexustate",
-  "version": "1.0.43",
+  "version": "1.0.44",
   "description": "State management with listeners",
   "main": "./dist/src/index.js",
   "typings": "./src/index.d.ts",
