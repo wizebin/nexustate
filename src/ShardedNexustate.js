@@ -1,5 +1,6 @@
 import Nexustate from './Nexustate';
 import { values, getTypeString } from 'objer';
+import getPromiseFunction from './utility/promise';
 
 export default class ShardedNexustate {
   constructor({ saveCallback, loadCallback } = {}) {
@@ -8,6 +9,7 @@ export default class ShardedNexustate {
       saveCallback,
       loadCallback
     };
+    this.promise = getPromiseFunction();
   }
 
   setAllPersistenceFunctions(saveCallback, loadCallback) {
@@ -50,13 +52,13 @@ export default class ShardedNexustate {
       if (loadedShard) {
         const loadResult = loadedShard.load();
         const loadResultType = getTypeString(loadResult);
-        if (loadResultType === 'promise' || loadResult instanceof Promise) {
+        if (loadResultType === 'promise' || loadResult instanceof this.promise) {
           promises.push(loadResult);
         } else {
-          promises.push(Promise.resolve(loadResult));
+          promises.push(this.promise.resolve(loadResult));
         }
       }
     });
-    return Promise.all(promises);
+    return this.promise.all(promises);
   }
 }

@@ -2,6 +2,7 @@ import { getObjectPath, keys, assurePathExists, has, get, set, getTypeString, va
 import { findIndex, throttle, getKeyFilledObject } from './NexustateHelpers';
 import StorageManager from './StorageManager';
 import { isBlankKey } from './utility/blankKey';
+import getPromiseFunction from './utility/promise';
 
 const SAVE_THROTTLE_TIME = 100;
 
@@ -38,6 +39,7 @@ export default class Nexustate {
     this.saveCallback = saveCallback || Nexustate.defaultSaveCallback;
     this.loadCallback = loadCallback || Nexustate.defaultLoadCallback;
     this.persist = persist;
+    this.promise = getPromiseFunction();
   }
 
   setOptions({ saveCallback, loadCallback, storageKey, persist } = {}) {
@@ -150,7 +152,7 @@ export default class Nexustate {
   load = () => {
     const loadResults = this.loadCallback(this.storageKey);
 
-    if (loadResults instanceof Promise) {
+    if (loadResults instanceof this.promise) {
       return loadResults.then(data => {
         this.setKey(null, data);
       });
