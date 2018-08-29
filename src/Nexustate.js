@@ -20,9 +20,9 @@ export function getLocalStorageSaveFunc() {
 
 export function getLocalStorageLoadFunc() {
   if (typeof global !== 'undefined' && typeof global.localStorage !== 'undefined') {
-    return (key) => JSON.parse(global.localStorage.getItem(key));
+    return (key) => global.localStorage.getItem(key) ? JSON.parse(global.localStorage.getItem(key)) : {};
   } else if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
-    return (key) => JSON.parse(window.localStorage.getItem(key));
+    return (key) => window.localStorage.getItem(key) ? JSON.parse(window.localStorage.getItem(key)) : {};
   }
 }
 
@@ -111,8 +111,8 @@ export default class Nexustate {
   }
 
   getForListener = (listener, keyChange) => {
-    const { key, alias, callback, transform } = listener;
-    const value = this.storageManager.get(key);
+    const { key, alias, callback, transform, defaultValue } = listener;
+    const value = this.storageManager.has(key) ? this.storageManager.get(key) : defaultValue;
 
     return { keyChange, alias, callback, key, value: transform ? transform(value) : value };
   }
@@ -265,7 +265,7 @@ export default class Nexustate {
     this.executeNotifyBatch(this.getNotifyBatch({ key, value }));
   }
 
-  listen = (listener = { key: null, callback: () => {}, alias: null, component: null, transform: null, noChildUpdates: false }) => {
+  listen = (listener = { key: null, callback: () => {}, alias: null, component: null, transform: null, noChildUpdates: false, defaultValue: undefined }) => {
     const listeners = this.getListenersAtPath(listener.key);
     const matchedListeners = listeners.reduce((results, existingListener, dex) => {
       if (existingListener.callback === listener.callback) results.push(dex);

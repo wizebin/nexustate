@@ -68,6 +68,15 @@ describe('Nexustate Agent', () => {
       agent.listen({ key: 'test2' });
       expect(agent.data).to.deep.equal({ test: 'value', test2: 'value2' });
     });
+    it('Executes initial load with default successfully', () => {
+      const state = new ShardedNexustate();
+      state.getShard().set('test2', 'value2');
+      const agent = new NexustateAgent({ shardedNexustate: state });
+      agent.listen({ key: 'test', defaultValue: 'bobby' });
+      expect(agent.data).to.deep.equal({ test: 'bobby' });
+      agent.listen({ key: 'test2' });
+      expect(agent.data).to.deep.equal({ test: 'bobby', test2: 'value2' });
+    });
     it('Uses nested aliases correctly', () => {
       const state = new ShardedNexustate();
       state.getShard().set('test', 'value');
